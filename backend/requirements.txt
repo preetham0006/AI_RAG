@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+python-multipart
+python-dotenv
+pymupdf
+python-docx
+langchain
+langchain-google-genai
+llama-index-core
+llama-index-embeddings-huggingface
+sentence-transformers
+pydantic

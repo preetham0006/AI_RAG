@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>AI Document Intelligence Platform</title>
+
+  <!-- Markdown renderer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 35px auto;
+      padding: 0 20px;
+    }
+
+    /* -----------------------------
+       HEADER
+    ----------------------------- */
+
+    .header {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    }
+
+    .header h1 {
+      margin: 0 0 8px 0;
+      font-size: 28px;
+    }
+
+    .header p {
+      margin: 0;
+      color: #6b7280;
+    }
+
+    /* -----------------------------
+       CARDS
+    ----------------------------- */
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    /* -----------------------------
+       FILE UPLOAD
+    ----------------------------- */
+
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      background: #f8fafc;
+      cursor: pointer;
+    }
+
+    /* -----------------------------
+       TEXTAREA
+    ----------------------------- */
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 14px;
+
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+
+      resize: vertical;
+
+      font-family: Arial, sans-serif;
+      font-size: 15px;
+
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: #2563eb;
+    }
+
+    /* -----------------------------
+       BUTTONS
+    ----------------------------- */
+
+    button {
+      margin-top: 12px;
+
+      padding: 10px 20px;
+
+      border: none;
+      border-radius: 7px;
+
+      background: #2563eb;
+      color: white;
+
+      font-size: 14px;
+      font-weight: 600;
+
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    /* -----------------------------
+       STATUS
+    ----------------------------- */
+
+    .status {
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .muted {
+      color: #6b7280;
+    }
+
+    .error {
+      color: #b91c1c;
+    }
+
+    .success {
+      color: #166534;
+    }
+
+    /* -----------------------------
+       DOCUMENT LIST
+    ----------------------------- */
+
+    .docs {
+      margin-top: 15px;
+    }
+
+    .doc {
+      display: inline-block;
+
+      background: #eef2ff;
+
+      padding: 7px 10px;
+
+      border-radius: 6px;
+
+      margin: 4px;
+
+      font-size: 13px;
+    }
+
+    /* -----------------------------
+       ANSWER
+    ----------------------------- */
+
+    .answer {
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .answer h1,
+    .answer h2,
+    .answer h3 {
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
+    .answer h1:first-child,
+    .answer h2:first-child,
+    .answer h3:first-child {
+      margin-top: 0;
+    }
+
+    .answer p {
+      margin: 10px 0;
+    }
+
+    .answer ul,
+    .answer ol {
+      padding-left: 25px;
+      margin: 10px 0;
+    }
+
+    .answer li {
+      margin: 6px 0;
+    }
+
+    .answer strong {
+      font-weight: 700;
+    }
+
+    .answer code {
+      background: #f1f5f9;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+
+    .answer blockquote {
+      border-left: 4px solid #2563eb;
+      padding-left: 15px;
+      color: #4b5563;
+      margin-left: 0;
+    }
+
+    /* -----------------------------
+       SOURCE REFERENCES
+    ----------------------------- */
+
+    .source-container {
+      margin-top: 15px;
+    }
+
+    .source {
+      padding: 12px;
+
+      margin: 8px 0;
+
+      background: #f8fafc;
+
+      border: 1px solid #e5e7eb;
+
+      border-radius: 8px;
+
+      font-size: 14px;
+    }
+
+    .source span {
+      color: #6b7280;
+    }
+
+    /* -----------------------------
+       LOADING
+    ----------------------------- */
+
+    .loading {
+      color: #6b7280;
+      font-style: italic;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+
+  <!-- =========================================
+       HEADER
+  ========================================== -->
+
+  <div class="header">
+
+    <h1>
+      AI Document Intelligence Platform
+    </h1>
+
+    <p>
+      Upload business documents and interact with them using natural language.
+    </p>
+
+  </div>
+
+
+
+  <!-- =========================================
+       DOCUMENT UPLOAD
+  ========================================== -->
+
+  <div class="card">
+
+    <h2>
+      1. Upload Documents
+    </h2>
+
+    <p class="muted">
+      Supported formats: PDF, DOCX and TXT
+    </p>
+
+    <input
+      id="files"
+      type="file"
+      multiple
+      accept=".pdf,.docx,.txt"
+    />
+
+    <br />
+
+    <button
+      id="uploadBtn"
+      onclick="uploadDocuments()"
+    >
+      Upload & Process
+    </button>
+
+    <div
+      id="uploadStatus"
+      class="status"
+    ></div>
+
+
+    <!-- Uploaded documents -->
+
+    <div
+      id="documents"
+      class="docs"
+    ></div>
+
+  </div>
+
+
+
+  <!-- =========================================
+       ASK QUESTION
+  ========================================== -->
+
+  <div class="card">
+
+    <h2>
+      2. Ask Your Documents
+    </h2>
+
+    <textarea
+      id="question"
+      placeholder="Examples:
+
+What are the main risks mentioned in this document?
+
+Summarize the key points from this report.
+
+What was the revenue in 2025?
+
+Compare the 2024 and 2025 reports.
+
+Extract the contract start date and end date."
+    ></textarea>
+
+    <button
+      id="askBtn"
+      onclick="askQuestion()"
+    >
+      Ask
+    </button>
+
+  </div>
+
+
+
+  <!-- =========================================
+       ANSWER
+  ========================================== -->
+
+  <div class="card">
+
+    <h2>
+      Answer
+    </h2>
+
+    <div
+      id="answer"
+      class="answer muted"
+    >
+      Upload a document and ask a question.
+    </div>
+
+
+    <!-- =========================================
+         SOURCES
+    ========================================== -->
+
+    <h3>
+      Source References
+    </h3>
+
+    <div
+      id="sources"
+      class="source-container muted"
+    >
+      No sources yet.
+    </div>
+
+  </div>
+
+
+</div>
+
+
+
+<script>
+
+  /*
+  =====================================================
+  GLOBAL ELEMENTS
+  =====================================================
+  */
+
+  const uploadStatus =
+    document.getElementById("uploadStatus");
+
+
+  /*
+  =====================================================
+  LOAD UPLOADED DOCUMENTS
+  =====================================================
+  */
+
+  async function loadDocuments() {
+
+    try {
+
+      const res =
+        await fetch("/api/documents");
+
+
+      const data =
+        await res.json();
+
+
+      const documentsElement =
+        document.getElementById("documents");
+
+
+      if (
+        !data.documents ||
+        data.documents.length === 0
+      ) {
+
+        documentsElement.innerHTML =
+          '<span class="muted">No documents uploaded yet.</span>';
+
+        return;
+      }
+
+
+      documentsElement.innerHTML =
+        data.documents
+          .map(
+            d =>
+              `<span class="doc">
+                📄 ${escapeHtml(d.document_name)}
+              </span>`
+          )
+          .join("");
+
+
+    } catch (error) {
+
+      console.error(
+        "Failed to load documents:",
+        error
+      );
+
+    }
+
+  }
+
+
+
+  /*
+  =====================================================
+  UPLOAD DOCUMENTS
+  =====================================================
+  */
+
+  async function uploadDocuments() {
+
+    const input =
+      document.getElementById("files");
+
+
+    /*
+    Check whether files were selected
+    */
+
+    if (!input.files.length) {
+
+      uploadStatus.innerHTML =
+        '<span class="error">' +
+        'Choose at least one PDF, DOCX or TXT file.' +
+        '</span>';
+
+      return;
+    }
+
+
+    /*
+    Create FormData
+    */
+
+    const form =
+      new FormData();
+
+
+    /*
+    Add every selected file
+    */
+
+    for (
+      const file of input.files
+    ) {
+
+      form.append(
+        "files",
+        file
+      );
+
+    }
+
+
+    /*
+    Disable button while processing
+    */
+
+    const btn =
+      document.getElementById("uploadBtn");
+
+    btn.disabled = true;
+
+
+    uploadStatus.innerHTML =
+      '<span class="loading">' +
+      'Processing documents... Please wait.' +
+      '</span>';
+
+
+    try {
+
+      /*
+      Send files to FastAPI
+      */
+
+      const res =
+        await fetch(
+          "/api/documents/upload",
+          {
+            method: "POST",
+            body: form
+          }
+        );
+
+
+      const data =
+        await res.json();
+
+
+      /*
+      Check API response
+      */
+
+      if (!res.ok) {
+
+        throw new Error(
+          data.detail ||
+          "Upload failed."
+        );
+
+      }
+
+
+      /*
+      Success message
+      */
+
+      uploadStatus.innerHTML =
+        '<span class="success">' +
+        '✓ Documents processed successfully.' +
+        '</span>';
+
+
+      /*
+      Refresh document list
+      */
+
+      await loadDocuments();
+
+
+      /*
+      Clear selected files
+      */
+
+      input.value = "";
+
+
+    } catch (err) {
+
+      uploadStatus.innerHTML =
+        `<span class="error">
+          ${escapeHtml(err.message)}
+        </span>`;
+
+    } finally {
+
+      btn.disabled = false;
+
+    }
+
+  }
+
+
+
+  /*
+  =====================================================
+  ASK QUESTION
+  =====================================================
+  */
+
+  async function askQuestion() {
+
+    const question =
+      document
+        .getElementById("question")
+        .value
+        .trim();
+
+
+    /*
+    Don't send empty questions
+    */
+
+    if (!question) {
+
+      return;
+
+    }
+
+
+    /*
+    Disable button
+    */
+
+    const btn =
+      document.getElementById("askBtn");
+
+    btn.disabled = true;
+
+
+    /*
+    Show loading message
+    */
+
+    document
+      .getElementById("answer")
+      .innerHTML =
+        '<span class="loading">' +
+        'Searching documents and generating answer...' +
+        '</span>';
+
+
+    /*
+    Clear previous sources
+    */
+
+    document
+      .getElementById("sources")
+      .textContent = "";
+
+
+    try {
+
+      /*
+      Send question to FastAPI
+      */
+
+      const res =
+        await fetch(
+          "/api/chat",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body: JSON.stringify({
+              question: question
+            })
+
+          }
+        );
+
+
+      /*
+      Parse API response
+      */
+
+      const data =
+        await res.json();
+
+
+      /*
+      Check API status
+      */
+
+      if (!res.ok) {
+
+        throw new Error(
+          data.detail ||
+          "Question failed."
+        );
+
+      }
+
+
+      /*
+      ==========================================
+      RENDER ANSWER
+      ==========================================
+      
+      Gemini can return Markdown.
+
+      Example:
+
+      ## Summary
+
+      **TaskPilot**
+
+      - Java
+      - Spring Boot
+      - React
+
+      marked.parse() converts that Markdown
+      into readable HTML.
+      */
+
+      document
+        .getElementById("answer")
+        .innerHTML =
+          marked.parse(
+            data.answer || ""
+          );
+
+
+      /*
+      ==========================================
+      RENDER SOURCE REFERENCES
+      ==========================================
+      */
+
+      const sources =
+        data.sources || [];
+
+
+      if (
+        sources.length === 0
+      ) {
+
+        document
+          .getElementById("sources")
+          .textContent =
+            "No supporting source was found.";
+
+      }
+
+      else {
+
+        document
+          .getElementById("sources")
+          .innerHTML =
+
+          sources
+            .map(
+              s =>
+
+                `<div class="source">
+
+                  📄
+                  <strong>
+                    ${escapeHtml(
+                      s.document || "Unknown document"
+                    )}
+                  </strong>
+
+                  <span>
+                    • Page
+                    ${escapeHtml(
+                      String(s.page ?? "Unknown")
+                    )}
+                  </span>
+
+                  <span>
+                    •
+                    ${escapeHtml(
+                      s.section || "Document text"
+                    )}
+                  </span>
+
+                </div>`
+            )
+            .join("");
+
+      }
+
+
+    } catch (err) {
+
+      /*
+      Display error
+      */
+
+      document
+        .getElementById("answer")
+        .innerHTML =
+          `<span class="error">
+            ${escapeHtml(err.message)}
+          </span>`;
+
+
+      document
+        .getElementById("sources")
+        .textContent =
+          "Unable to retrieve source references.";
+
+    }
+
+    finally {
+
+      /*
+      Enable button again
+      */
+
+      btn.disabled = false;
+
+    }
+
+  }
+
+
+
+  /*
+  =====================================================
+  ESCAPE HTML
+  =====================================================
+  
+  Prevents document content from being interpreted
+  as HTML when we display document names and metadata.
+  */
+
+  function escapeHtml(value) {
+
+    return String(value).replace(
+      /[&<>"']/g,
+
+      function (character) {
+
+        return {
+
+          "&": "&amp;",
+
+          "<": "&lt;",
+
+          ">": "&gt;",
+
+          '"': "&quot;",
+
+          "'": "&#039;"
+
+        }[character];
+
+      }
+
+    );
+
+  }
+
+
+
+  /*
+  =====================================================
+  INITIALIZE APPLICATION
+  =====================================================
+  */
+
+  loadDocuments();
+
+</script>
+
+</body>
+
+</html>
